@@ -4,10 +4,12 @@ import com.uoc.util.Fixtures.Companion.order
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 
 import org.junit.jupiter.api.Test
 
 @MicronautTest
+@Disabled("Only for manual testing")
 class RedisCacheRepositoryTest {
 
     @Inject

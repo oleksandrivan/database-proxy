@@ -61,5 +61,4 @@ class V1ControllerTest : AbstractIntegrationTest() {
         assert(response.status.code == 200)
         assert(response.body().contains("\"status\":\"DELIVERED\""))
     }
-
 }
