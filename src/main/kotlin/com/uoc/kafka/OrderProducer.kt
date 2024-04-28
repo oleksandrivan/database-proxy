@@ -5,10 +5,12 @@ import com.uoc.domain.Order
 import com.uoc.domain.OrderId
 import com.uoc.domain.OrderItem
 import com.uoc.kafka.message.*
+import com.uoc.repository.RedisCacheRepository
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
 
 interface OrderProducer {
     fun storeOrder(order: Order)

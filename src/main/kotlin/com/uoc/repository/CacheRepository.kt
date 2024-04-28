@@ -1,14 +1,14 @@
 package com.uoc.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.uoc.domain.Order
+import com.uoc.domain.*
 import io.lettuce.core.api.StatefulRedisConnection
-import io.lettuce.core.api.sync.RedisCommands
 import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory
 
 interface CacheRepository {
     fun storeOrder(order: Order)
+    fun getOrder(orderId: OrderId): Result<Order>
 }
 
 @Singleton
@@ -17,13 +17,21 @@ class RedisCacheRepository(
 ) : CacheRepository {
 
     private val objectMapper = ObjectMapper()
-    private val logger = LoggerFactory.getLogger(RedisCacheRepository::class.java)
 
     override fun storeOrder(order: Order) {
         val commands = connection.sync()
         val orderJson = objectMapper.writeValueAsString(order.toEntry())
         commands.set(order.orderId.value, orderJson)
-        logger.info("Order stored in cache: ${commands.get(order.orderId.value)}")
+
+    }
+
+    override fun getOrder(orderId: OrderId): Result<Order> {
+        val commands = connection.sync()
+        val orderJson: String? = commands.get(orderId.value)
+        return orderJson?.let{
+            val entry = objectMapper.readValue(it, OrderCacheEntry::class.java)
+            Result.success(entry.toDomain())
+        } ?: Result.failure(RuntimeException("Order not found"))
     }
 
     companion object{
@@ -32,6 +40,14 @@ class RedisCacheRepository(
             customerId = customerId.value,
             addressId = shippingAddress.value,
             status = status.name
+        )
+
+        private fun OrderCacheEntry.toDomain() = Order(
+            orderId = OrderId(id),
+            customerId = CustomerId(customerId),
+            items = emptyList(),
+            shippingAddress = AddressId(addressId),
+            status = OrderStatus.valueOf(status)
         )
     }
 }

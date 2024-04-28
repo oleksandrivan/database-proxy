@@ -11,4 +11,13 @@ class ConfigReader {
 
     @Property(name = "kafka.topic.orderItems.name")
     lateinit var orderItemsTopic: String
+
+    @Property(name = "database.url")
+    lateinit var databaseUrl: String
+
+    @Property(name = "database.username")
+    lateinit var username: String
+
+    @Property(name = "database.password")
+    lateinit var password: String
 }

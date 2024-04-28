@@ -1,10 +1,13 @@
 package com.uoc.kafka.message
 
+import io.micronaut.serde.annotation.Serdeable
+
 sealed class Schema {
     abstract val type: String
     abstract val fields: List<Field>
 }
 
+@Serdeable
 data class OrderSchema(
     override val type: String = "struct",
     override val fields: List<Field>
@@ -20,6 +23,7 @@ data class OrderSchema(
     }
 }
 
+@Serdeable
 data class OrderItemSchema(
     override val type: String = "struct",
     override val fields: List<Field>
