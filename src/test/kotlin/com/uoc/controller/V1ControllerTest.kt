@@ -36,10 +36,21 @@ class V1ControllerTest : AbstractIntegrationTest() {
         assert(postResponse.body().contains(uuidRegex))
 
         val orderUuid = uuidRegex.find(postResponse.body())!!.value
+
+        //Update order status
+        val updateJson = """
+            {
+                "status": "PREPARING"
+            }
+        """
+        val updateRequest = HttpRequest.PATCH("/v1/orders/$orderUuid", updateJson)
+        val updateResponse = client.toBlocking().exchange(updateRequest, String::class.java)
+        assert(updateResponse.status.code == 200)
+
         val getRequest = HttpRequest.GET<String>("/v1/orders/$orderUuid")
         val orderInfoResponse = client.toBlocking().exchange(getRequest, String::class.java)
         assert(orderInfoResponse.status.code == 200)
-        assert(orderInfoResponse.body().contains("\"status\":\"CREATED\""))
+        assert(orderInfoResponse.body().contains("\"status\":\"PREPARING\""))
     }
 
     @Test

@@ -19,4 +19,3 @@ data class OrderItemPayload(
     @JsonProperty("productId") val productId: String,
     @JsonProperty("quantity") val quantity: Int
 ): Payload()
-

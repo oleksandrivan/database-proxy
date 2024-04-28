@@ -4,13 +4,12 @@ import com.uoc.config.ConfigReader
 import com.uoc.domain.Order
 import com.uoc.domain.OrderId
 import com.uoc.domain.OrderItem
+import com.uoc.domain.OrderStatus
 import com.uoc.kafka.message.*
-import com.uoc.repository.RedisCacheRepository
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
 
 interface OrderProducer {
     fun storeOrder(order: Order)
@@ -26,11 +25,12 @@ class KafkaOrderProducer(
 
     override fun storeOrder(order: Order) {
         val orderMessage = Message(OrderSchema.instance(), order.toPayload())
-        val orderItemsMessages = order.items.map { Message(OrderItemSchema.instance(), it.toPayload(order.orderId)) }
+        val orderItemsMessages =
+            order.items.map { Message(OrderItemSchema.instance(), it.toPayload(order.orderId)) }
         val orderRecord = orderMessage.toRecord(order.orderId, configReader)
         val orderItemsRecords = orderItemsMessages.map { it.toRecord(order.orderId, configReader) }
         kafkaProducer.send(orderRecord)
-        orderItemsRecords.forEach{ record -> kafkaProducer.send(record)}
+        orderItemsRecords.forEach { record -> kafkaProducer.send(record) }
     }
 
     companion object {
@@ -42,6 +42,7 @@ class KafkaOrderProducer(
                 status = status.name
             )
         }
+
         private fun OrderItem.toPayload(orderId: OrderId): OrderItemPayload {
             return OrderItemPayload(
                 orderId = orderId.value,
@@ -51,10 +52,21 @@ class KafkaOrderProducer(
         }
 
         private fun <T : Payload, S : Schema> Message<T, S>.toRecord(
-            orderId: OrderId, configReader: ConfigReader): CustomRecord {
+            orderId: OrderId, configReader: ConfigReader
+        ): CustomRecord {
             return when (schema) {
-                is OrderSchema -> ProducerRecord(configReader.ordersTopic,orderId.value, this) as CustomRecord
-                is OrderItemSchema -> ProducerRecord(configReader.orderItemsTopic, orderId.value, this) as CustomRecord
+                is OrderSchema -> ProducerRecord(
+                    configReader.ordersTopic,
+                    orderId.value,
+                    this
+                ) as CustomRecord
+
+                is OrderItemSchema -> ProducerRecord(
+                    configReader.orderItemsTopic,
+                    orderId.value,
+                    this
+                ) as CustomRecord
+
                 else -> throw IllegalArgumentException("Unknown schema")
             }
         }

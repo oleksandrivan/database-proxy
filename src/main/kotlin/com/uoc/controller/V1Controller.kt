@@ -32,6 +32,16 @@ class V1Controller(
         )
     }
 
+    @Patch("/orders/{orderId}")
+    fun updateOrder(@PathVariable orderId: OrderId, @Body request: String): HttpResponse<String> {
+        val updateOrderRequest = mapper.readValue(request, UpdateOrderRequest::class.java)
+        val result = proxyOrderService.updateOrder(orderId, updateOrderRequest.toDomain())
+        return result.fold(
+            onSuccess = { HttpResponse.ok() },
+            onFailure = { HttpResponse.serverError(mapper.writeValueAsString(OrderFailureResponse(it.message!!))) }
+        )
+    }
+
     companion object{
         private fun CreateOrderRequest.toDomain() = Order(
             orderId = OrderId(),
@@ -39,6 +49,7 @@ class V1Controller(
             items = items.map { OrderItem(it.key, it.value) },
             shippingAddress = AddressId(1)
         )
+        fun UpdateOrderRequest.toDomain() = OrderStatus.valueOf(status)
 
         private fun Order.toResponse() = OrderInfoResponse(
             orderId = orderId.value,
