@@ -3,11 +3,10 @@ package com.uoc.kafka
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.uoc.config.ConfigReader
 import com.uoc.domain.Order
-import com.uoc.kafka.message.Message
-import com.uoc.kafka.message.User
-import com.uoc.kafka.message.UserSchema
+import com.uoc.domain.OrderId
+import com.uoc.domain.OrderItem
+import com.uoc.kafka.message.*
 import io.micronaut.configuration.kafka.annotation.KafkaClient
-import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -15,29 +14,52 @@ import org.slf4j.LoggerFactory
 
 interface OrderProducer {
     fun storeOrder(order: Order)
-    fun produceUserMessage(user: User)
 }
+
+typealias CustomRecord = ProducerRecord<String, Message<Payload, Schema>>
 
 @Singleton
 class KafkaOrderProducer(
     private val configReader: ConfigReader,
+    @KafkaClient("order-producer") private val kafkaProducer: Producer<String, Message<Payload, Schema>>
 ) : OrderProducer {
-
-    @Inject
-    @KafkaClient("user-producer")
-    private lateinit var kafkaProducer: Producer<String, Message<User, UserSchema>>
 
     private val log = LoggerFactory.getLogger(KafkaOrderProducer::class.java)
     private val objectMapper = ObjectMapper()
 
     override fun storeOrder(order: Order) {
-        log.info("Storing order: $order")
+        val orderMessage = Message(OrderSchema.instance(), order.toPayload())
+        val orderItemsMessages = order.items.map { Message(OrderItemSchema.instance(), it.toPayload(order.orderId)) }
+        log.info("Sending order message: ${objectMapper.writeValueAsString(orderMessage)}")
+        val orderRecord = orderMessage.toRecord(configReader)
+        val orderItemsRecords = orderItemsMessages.map { it.toRecord(configReader) }
+        kafkaProducer.send(orderRecord)
+        orderItemsRecords.forEach{ record -> kafkaProducer.send(record)}
     }
 
-    override fun produceUserMessage(user: User) {
-        val message = Message(UserSchema.instance(), user)
-        log.info("Sending user message: ${objectMapper.writeValueAsString(message)}")
-        val record = ProducerRecord<String, Message<User, UserSchema>>("customers", message)
-        kafkaProducer.send(record)
+    companion object {
+        private fun Order.toPayload(): OrderPayload {
+            return OrderPayload(
+                id = orderId.value,
+                customerId = customerId.value,
+                addressId = shippingAddress.value,
+                status = status.name
+            )
+        }
+        private fun OrderItem.toPayload(orderId: OrderId): OrderItemPayload {
+            return OrderItemPayload(
+                orderId = orderId.value,
+                productId = productId,
+                quantity = quantity
+            )
+        }
+
+        private fun <T : Payload, S : Schema> Message<T, S>.toRecord(configReader: ConfigReader): CustomRecord {
+            return when (schema) {
+                is OrderSchema -> ProducerRecord(configReader.ordersTopic,null, this) as CustomRecord
+                is OrderItemSchema -> ProducerRecord(configReader.orderItemsTopic, null, this) as CustomRecord
+                else -> throw IllegalArgumentException("Unknown schema")
+            }
+        }
     }
 }

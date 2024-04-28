@@ -1,10 +1,8 @@
 package com.uoc.kafka
 
-import com.uoc.kafka.message.User
+import com.uoc.domain.*
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
-import org.junit.jupiter.api.Assertions.*
-
 import org.junit.jupiter.api.Test
 
 @MicronautTest
@@ -15,7 +13,20 @@ class KafkaOrderProducerTest {
 
     @Test
     fun produceUserMessage() {
-        val user = User(100L, "JohnDoe", "EU", "ALPHAMALE")
-        kafkaOrderProducer.produceUserMessage(user)
+        kafkaOrderProducer.storeOrder(order())
+    }
+
+    companion object {
+        private fun order(): Order {
+            return Order(
+                orderId = OrderId(),
+                customerId = CustomerId(1),
+                shippingAddress = AddressId(1),
+                items = listOf(
+                    OrderItem(productId = "ProductA", quantity = 1),
+                    OrderItem(productId = "ProductB", quantity = 2)
+                ),
+            )
+        }
     }
 }
