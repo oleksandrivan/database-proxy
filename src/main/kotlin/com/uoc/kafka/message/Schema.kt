@@ -18,7 +18,9 @@ data class OrderSchema(
             val customerId = Field("customerId", "int64", false)
             val addressId = Field("shippingAddress", "int64", false)
             val status = Field("status", "string", false)
-            return OrderSchema(fields = listOf(orderId, customerId, addressId, status))
+            val createTimestamp = Field("createdAt", "string", false)
+            val updateTimestamp = Field("updatedAt", "string", false)
+            return OrderSchema(fields = listOf(orderId, customerId, addressId, status, createTimestamp, updateTimestamp))
         }
     }
 }

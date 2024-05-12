@@ -10,6 +10,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.time.format.DateTimeFormatter
 
 interface OrderProducer {
     fun storeOrder(order: Order)
@@ -39,7 +40,9 @@ class KafkaOrderProducer(
                 id = orderId.value,
                 customerId = customerId.value,
                 addressId = shippingAddress.value,
-                status = status.name
+                status = status.name,
+                createdAt = createdAt.format(DateTimeFormatter.ISO_DATE_TIME),
+                updatedAt = updatedAt.format(DateTimeFormatter.ISO_DATE_TIME)
             )
         }
 

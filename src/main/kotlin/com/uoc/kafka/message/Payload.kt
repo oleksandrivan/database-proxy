@@ -10,7 +10,9 @@ data class OrderPayload(
     @JsonProperty("id") val id: String,
     @JsonProperty("customerId") val customerId: Int,
     @JsonProperty("shippingAddress") val addressId: Int,
-    @JsonProperty("status") val status: String
+    @JsonProperty("status") val status: String,
+    @JsonProperty("createdAt") val createdAt: String,
+    @JsonProperty("updatedAt") val updatedAt: String,
 ): Payload()
 
 @Serdeable
