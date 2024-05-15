@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.uoc.domain.*
 import io.lettuce.core.api.StatefulRedisConnection
 import jakarta.inject.Singleton
-import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 interface CacheRepository {
     fun storeOrder(order: Order)
     fun getOrder(orderId: OrderId): Result<Order>
+    fun deleteOrder(orderId: OrderId): Result<Unit>
 }
 
 @Singleton
@@ -34,12 +36,23 @@ class RedisCacheRepository(
         } ?: Result.failure(RuntimeException("Order not found"))
     }
 
+    override fun deleteOrder(orderId: OrderId): Result<Unit> {
+        val commands = connection.sync()
+        return if (commands.del(orderId.value) == 1L) {
+            Result.success(Unit)
+        } else {
+            Result.failure(RuntimeException("Order not found"))
+        }
+    }
+
     companion object{
         private fun Order.toEntry() = OrderCacheEntry(
             id = orderId.value,
             customerId = customerId.value,
             addressId = shippingAddress.value,
-            status = status.name
+            status = status.name,
+            createdAt = createdAt.toEpochSecond(ZoneOffset.UTC),
+            updatedAt = updatedAt.toEpochSecond(ZoneOffset.UTC),
         )
 
         private fun OrderCacheEntry.toDomain() = Order(
@@ -47,7 +60,9 @@ class RedisCacheRepository(
             customerId = CustomerId(customerId),
             items = emptyList(),
             shippingAddress = AddressId(addressId),
-            status = OrderStatus.valueOf(status)
+            status = OrderStatus.valueOf(status),
+            createdAt = LocalDateTime.ofEpochSecond(createdAt, 0, ZoneOffset.UTC),
+            updatedAt = LocalDateTime.ofEpochSecond(updatedAt, 0, ZoneOffset.UTC),
         )
     }
 }

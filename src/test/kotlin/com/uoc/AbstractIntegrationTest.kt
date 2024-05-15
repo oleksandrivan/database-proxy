@@ -27,7 +27,7 @@ abstract class AbstractIntegrationTest: TestPropertyProvider {
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(RedisCacheRepository::class.java)
+        private val logger = LoggerFactory.getLogger(AbstractIntegrationTest::class.java)
 
         @Container
         val mySQLContainer: MySQLContainer<Nothing> = MySQLContainer<Nothing>(MY_SQL_CONTAINER)

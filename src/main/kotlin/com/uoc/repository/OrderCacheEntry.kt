@@ -6,5 +6,7 @@ data class OrderCacheEntry(
     @JsonProperty("id") val id: String,
     @JsonProperty("customerId") val customerId: Int,
     @JsonProperty("shippingAddress") val addressId: Int,
-    @JsonProperty("status") val status: String
+    @JsonProperty("status") val status: String,
+    @JsonProperty("createdAt") val createdAt: Long,
+    @JsonProperty("updatedAt") val updatedAt: Long,
 )

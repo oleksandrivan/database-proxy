@@ -7,6 +7,7 @@ import com.uoc.kafka.OrderProducer
 import com.uoc.repository.CacheRepository
 import com.uoc.repository.PersistentRepository
 import jakarta.inject.Singleton
+import java.time.LocalDateTime
 
 interface ProxyOrderService {
 
@@ -40,7 +41,7 @@ class ProxyOrderServiceImpl(
     override fun updateOrder(orderId: OrderId, orderStatus: OrderStatus): Result<OrderId> {
         val order = getOrder(orderId)
         return order.map {
-            val updatedOrder = it.copy(status = orderStatus)
+            val updatedOrder = it.copy(status = orderStatus, updatedAt = LocalDateTime.now())
             cacheRepository.storeOrder(updatedOrder)
             orderProducer.storeOrder(updatedOrder)
             updatedOrder.orderId

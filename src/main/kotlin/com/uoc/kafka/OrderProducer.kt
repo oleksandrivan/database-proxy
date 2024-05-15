@@ -4,7 +4,6 @@ import com.uoc.config.ConfigReader
 import com.uoc.domain.Order
 import com.uoc.domain.OrderId
 import com.uoc.domain.OrderItem
-import com.uoc.domain.OrderStatus
 import com.uoc.kafka.message.*
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import jakarta.inject.Singleton
