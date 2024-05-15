@@ -1,18 +1,15 @@
 package com.uoc
 
-import com.uoc.repository.RedisCacheRepository
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import io.micronaut.test.support.TestPropertyProvider
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.containers.ComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import org.testcontainers.utility.DockerImageName
+import java.io.File
 
 
 private const val MY_SQL_CONTAINER = "mysql:8.0.26"
@@ -24,56 +21,34 @@ private const val KAFKA_CONTAINER = "confluentinc/cp-kafka:7.6.1"
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractIntegrationTest: TestPropertyProvider {
 
-
     companion object {
 
         private val logger = LoggerFactory.getLogger(AbstractIntegrationTest::class.java)
 
         @Container
-        val mySQLContainer: MySQLContainer<Nothing> = MySQLContainer<Nothing>(MY_SQL_CONTAINER)
-            .apply {
-                withDatabaseName("db")
-                withExposedPorts(3306)
-                withInitScript("init_mysql.sql")
-                waitingFor(Wait.forHealthcheck())
-            }
-
-        @Container
-        val redisContainer: GenericContainer<Nothing> =
-            GenericContainer<Nothing>(DockerImageName.parse(REDIS_CONTAINER))
-                .apply {
-                    withExposedPorts(6379)
-                    waitingFor(Wait.forLogMessage(".*Ready to accept connections.*", 1))
-                }
-
-        @Container
-        val kafkaContainer: KafkaContainer =
-            KafkaContainer(DockerImageName.parse(KAFKA_CONTAINER))
-                .apply {
-                    withKraft()
-                    waitingFor(Wait.forLogMessage(".*Kafka Server started.*", 1))
-                }
+        val environment: ComposeContainer = ComposeContainer(File("src/test/resources/docker-compose.yml"))
+            .withExposedService("redis", 6379, Wait.forListeningPort())
+            .withExposedService("broker", 9092, Wait.forListeningPort())
+            .withExposedService("mysql", 3306, Wait.forListeningPort())
 
         @BeforeAll
         @JvmStatic
         fun setup() {
-            mySQLContainer.start()
-            redisContainer.start()
-            kafkaContainer.start()
-            logger.info("Kafka container started at: ${kafkaContainer.bootstrapServers}")
-            logger.info("MySQL container started at: ${mySQLContainer.jdbcUrl}")
-            logger.info("Redis container started at: ${redisContainer.host}:${redisContainer.firstMappedPort}")
-
+            environment.start()
+            logger.info("DOCKER COMPOSE STARTED!")
+            logger.info("Kafka container started at: ${environment.getServicePort("broker", 9092)}")
+            logger.info("MySQL container started at: ${environment.getServicePort("mysql", 3306)}")
+            logger.info("Redis container started at: ${environment.getServicePort("redis", 6379)}")
         }
     }
 
     override fun getProperties(): MutableMap<String, String> {
         return mutableMapOf(
-            "kafka.bootstrap.servers" to "localhost:${kafkaContainer.firstMappedPort}",
-            "redis.uri" to "redis://localhost:${redisContainer.firstMappedPort}",
-            "database.url" to mySQLContainer.jdbcUrl,
-            "database.username" to mySQLContainer.username,
-            "database.password" to mySQLContainer.password
+            "redis.uri" to "redis://localhost:${environment.getServicePort("redis", 6379)}",
+            "kafka.bootstrap.servers" to "localhost:${environment.getServicePort("broker", 9092)}",
+            "database.url" to "jdbc:mysql://localhost:${environment.getServicePort("mysql", 3306)}/db",
+            "database.username" to "test",
+            "database.password" to "test"
         )
     }
 }

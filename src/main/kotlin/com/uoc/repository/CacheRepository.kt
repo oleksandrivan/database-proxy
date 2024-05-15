@@ -58,7 +58,6 @@ class RedisCacheRepository(
         private fun OrderCacheEntry.toDomain() = Order(
             orderId = OrderId(id),
             customerId = CustomerId(customerId),
-            items = emptyList(),
             shippingAddress = AddressId(addressId),
             status = OrderStatus.valueOf(status),
             createdAt = LocalDateTime.ofEpochSecond(createdAt, 0, ZoneOffset.UTC),

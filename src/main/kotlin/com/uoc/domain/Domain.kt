@@ -6,7 +6,7 @@ import java.util.*
 data class Order(
     val orderId: OrderId,
     val customerId: CustomerId,
-    val items: List<OrderItem>,
+    val items: List<OrderItem> = emptyList(),
     val shippingAddress: AddressId,
     var status: OrderStatus = OrderStatus.CREATED,
     val createdAt: LocalDateTime = LocalDateTime.now(),
