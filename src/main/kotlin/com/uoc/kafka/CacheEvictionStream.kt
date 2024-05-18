@@ -14,6 +14,7 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.KStream
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -50,8 +51,8 @@ class CacheEvictionStream(
                 customerId = CustomerId(customerId),
                 shippingAddress = AddressId(addressId),
                 status = OrderStatus.valueOf(status),
-                createdAt = LocalDateTime.ofEpochSecond(createdAt, 0, ZoneOffset.UTC),
-                updatedAt = LocalDateTime.ofEpochSecond(updatedAt, 0, ZoneOffset.UTC)
+                createdAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(createdAt), ZoneOffset.UTC),
+                updatedAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(updatedAt), ZoneOffset.UTC),
             )
         }
     }

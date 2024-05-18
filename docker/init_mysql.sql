@@ -38,4 +38,3 @@ CREATE TABLE `OrderItem` (
 INSERT INTO `Customer` (id, `name`, `email`) VALUES (1, 'John Doe', 'jonh.doe@example.com');
 INSERT INTO `Address` (id, `street`, `city`, `state`, `postalCode`, `country`) VALUES (1, '123 Main St', 'Springfield', 'IL', '62701', 'USA');
 INSERT INTO `Order` (id, customerId, `shippingAddress`, `status`) VALUES ('069738cb-adfe-4d28-964d-5bcb41d48943', 1, 1, 'DELIVERED');
-

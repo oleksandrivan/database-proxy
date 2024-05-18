@@ -35,8 +35,8 @@ class TestKafkaPublisher(
                 customerId = customerId.value,
                 addressId = shippingAddress.value,
                 status = status.name,
-                createdAt = createdAt.toEpochSecond(ZoneOffset.UTC),
-                updatedAt = updatedAt.toEpochSecond(ZoneOffset.UTC)
+                createdAt = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                updatedAt = updatedAt.toInstant(ZoneOffset.UTC).toEpochMilli()
             )
     }
 }

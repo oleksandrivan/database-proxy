@@ -1,14 +1,14 @@
 package com.uoc.kafka
 
-import com.uoc.AbstractIntegrationTest
 import com.uoc.domain.OrderStatus
 import com.uoc.util.Fixtures.Companion.order
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled("Only for local testing")
-class KafkaOrderProducerTest : AbstractIntegrationTest() {
+@MicronautTest
+class KafkaOrderProducerTest {
 
     @Inject
     lateinit var kafkaOrderProducer: KafkaOrderProducer

@@ -1,8 +1,8 @@
 package com.uoc.repository
 
-import com.uoc.AbstractIntegrationTest
 import com.uoc.domain.OrderStatus
 import com.uoc.util.Fixtures.Companion.order
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-@Disabled("Only for local testing")
-class RedisCacheRepositoryTest : AbstractIntegrationTest() {
+@MicronautTest
+class RedisCacheRepositoryTest {
 
     @Inject
     lateinit var redisCacheRepository: RedisCacheRepository

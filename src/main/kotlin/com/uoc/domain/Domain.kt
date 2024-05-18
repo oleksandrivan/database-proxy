@@ -1,6 +1,7 @@
 package com.uoc.domain
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 data class Order(
@@ -9,8 +10,8 @@ data class Order(
     val items: List<OrderItem> = emptyList(),
     val shippingAddress: AddressId,
     var status: OrderStatus = OrderStatus.CREATED,
-    val createdAt: LocalDateTime = LocalDateTime.now(),
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC")),
+    var updatedAt: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 )
 
 @JvmInline

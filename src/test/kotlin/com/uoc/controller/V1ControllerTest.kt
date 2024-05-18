@@ -1,16 +1,17 @@
 package com.uoc.controller
 
-import com.uoc.AbstractIntegrationTest
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.annotation.Client
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 
 
 private const val NOT_CACHED_ORDER_ID = "069738cb-adfe-4d28-964d-5bcb41d48943"
 
-class V1ControllerTest : AbstractIntegrationTest() {
+@MicronautTest
+class V1ControllerTest {
 
     @Inject
     @Client("/")

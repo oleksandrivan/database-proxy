@@ -9,6 +9,7 @@ plugins {
     id("io.micronaut.application") version "4.3.6"
     id("io.micronaut.test-resources") version "4.3.6"
     id("io.micronaut.aot") version "4.3.6"
+    id("com.avast.gradle.docker-compose") version "0.17.6"
 }
 
 version = "0.1"
@@ -40,8 +41,7 @@ dependencies {
     compileOnly("io.micronaut:micronaut-http-client")
     runtimeOnly("ch.qos.logback:logback-classic")
     testImplementation("io.micronaut:micronaut-http-client")
-    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
-    testImplementation("org.testcontainers:testcontainers:1.19.8")
+    testImplementation("com.github.rholder:guava-retrying:2.0.0")
 }
 
 
@@ -78,6 +78,11 @@ micronaut {
     }
 }
 
+dockerCompose {
+    useComposeFiles.set(listOf("docker/docker-compose.yml"))
+    isRequiredBy(tasks.named("test"))
+    stopContainers.set(false)
+}
 
 tasks.named<io.micronaut.gradle.docker.NativeImageDockerfile>("dockerfileNative") {
     jdkVersion = "21"

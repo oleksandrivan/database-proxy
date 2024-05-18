@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Disabled
 
 
 @MicronautTest
-@Disabled("Fails due to Kafka streams eager initialization")
 class DatabaseProxyTest {
 
     @Inject
