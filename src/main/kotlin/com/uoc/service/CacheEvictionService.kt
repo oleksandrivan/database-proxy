@@ -18,12 +18,8 @@ class RedisCacheEvictionService(
     private val log = LoggerFactory.getLogger(CacheEvictionService::class.java)
 
     override fun evict(orderToEvict: Order) {
-        log.info("Trying to evict order: {}", orderToEvict.orderId.value)
         val storedOrder = cacheRepository.getOrder(orderToEvict.orderId)
-        log.info("Retrieved stored record in cache {}", storedOrder)
         storedOrder.onSuccess {
-            log.info("Comparing status {} to {}", it.status, orderToEvict.status)
-            log.info("Comparing update timestamp {} to {}", it.updatedAt, orderToEvict.updatedAt)
             if(isSameEntry(it, orderToEvict)) {
                 log.info("Deleting order {}", orderToEvict.orderId.value)
                 cacheRepository.deleteOrder(orderToEvict.orderId)
